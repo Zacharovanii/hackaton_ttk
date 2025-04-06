@@ -5,7 +5,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import Link from "next/link";
-
+import { ArticleContent } from "../articleContent";
 interface ArticleItemProps {
 	id: number;
 	title: string;
@@ -56,10 +56,8 @@ export const ArticleItem: React.FC<ArticleItemProps> = ({
 						</h2>
 					</div>
 				</div>
-				<div className="p-4">
-					<p className="text-muted-foreground mb-4 line-clamp-3">
-						{description}
-					</p>
+				<div className="p-4 flex flex-col text-[8px] text-muted-foreground">
+					<ArticleContent content={description} mode="description" />
 					<div className=" text-sm text-muted-foreground">
 						{new Date(date).toLocaleDateString("ru-RU", {
 							day: "numeric",

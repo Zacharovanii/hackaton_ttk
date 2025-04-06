@@ -1,10 +1,11 @@
 import { ApiRoutes } from "./constants";
 import { axiosInstance } from "./instnance";
 
-export const getUser = async (token: string) => {
+export const getUser = async () => {
 	const response = await axiosInstance.get(ApiRoutes.USER_GET, {
 		headers: {
-			Authorization: `Bearer ${token}`,
+			Accept: "application/json",
+			"Content-Type": "application/json",
 		},
 	});
 	return response;

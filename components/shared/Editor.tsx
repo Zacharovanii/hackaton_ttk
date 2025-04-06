@@ -7,9 +7,10 @@ import { MenuBar } from "./editor-menubar";
 
 interface EditorProps {
 	onSave: (content: string) => void;
+	onCreate: (content: string) => void;
 }
 
-export function Editor({ onSave }: EditorProps) {
+export function Editor({ onSave, onCreate }: EditorProps) {
 	const editor = useEditor({
 		extensions: [StarterKit],
 		content: "<p>Начните писать здесь...</p>",
@@ -39,7 +40,12 @@ export function Editor({ onSave }: EditorProps) {
 
 	return (
 		<div className="border rounded-lg shadow-sm">
-			<MenuBar editor={editor} onSave={onSave} />
+			<MenuBar
+				className="sticky top-0"
+				editor={editor}
+				onSave={onSave}
+				onCreate={onCreate}
+			/>
 			<div
 				ref={editorRef}
 				className="overflow-hidden transition-all duration-200"

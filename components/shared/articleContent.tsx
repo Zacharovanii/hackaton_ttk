@@ -5,84 +5,95 @@ import DOMPurify from "dompurify";
 
 interface ArticleContentProps {
 	content: string;
+	mode?: "description" | "content";
 }
 
-export const ArticleContent = ({ content }: ArticleContentProps) => {
+export const ArticleContent = ({
+	content,
+	mode = "content",
+}: ArticleContentProps) => {
 	const contentRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		if (contentRef.current) {
-			// Очищаем и устанавливаем HTML-контент
-			const sanitizedContent = DOMPurify.sanitize(content);
-			contentRef.current.innerHTML = sanitizedContent;
+		if (!contentRef.current) return;
 
-			// Применяем стили к элементам контента
-			const elements = contentRef.current.querySelectorAll("*");
-			elements.forEach((element) => {
-				// Стили для заголовков
-				if (element.tagName === "H1") {
-					element.classList.add("text-4xl", "font-bold", "mb-6");
-				} else if (element.tagName === "H2") {
-					element.classList.add("text-3xl", "font-bold", "mb-5");
-				} else if (element.tagName === "H3") {
-					element.classList.add("text-2xl", "font-bold", "mb-4");
-				}
+		const sanitizedContent = DOMPurify.sanitize(content);
+		const tempContainer = document.createElement("div");
+		tempContainer.innerHTML = sanitizedContent;
 
-				// Стили для параграфов
-				if (element.tagName === "P") {
-					element.classList.add("text-lg", "mb-4", "leading-relaxed");
-				}
+		contentRef.current.innerHTML = "";
 
-				// Стили для списков
-				if (element.tagName === "UL" || element.tagName === "OL") {
-					element.classList.add("list-disc", "list-inside", "mb-4", "ml-4");
-				}
-
-				// Стили для ссылок
-				if (element.tagName === "A") {
-					element.classList.add("text-primary", "hover:underline");
-				}
-
-				// Стили для кода
-				if (element.tagName === "CODE") {
-					element.classList.add(
-						"bg-muted",
-						"px-2",
-						"py-1",
-						"rounded",
-						"text-sm"
-					);
-				}
-
-				// Стили для блоков кода
-				if (element.tagName === "PRE") {
-					element.classList.add(
-						"bg-muted",
-						"p-4",
-						"rounded-lg",
-						"overflow-x-auto",
-						"mb-4"
-					);
-				}
-
-				// Стили для изображений
-				if (element.tagName === "IMG") {
-					element.classList.add("max-w-full", "rounded-lg", "my-4");
-				}
-
-				// Стили для цитат
-				if (element.tagName === "BLOCKQUOTE") {
-					element.classList.add(
-						"border-l-4",
-						"border-primary",
-						"pl-4",
-						"my-4",
-						"italic"
-					);
-				}
+		if (mode === "description") {
+			const paragraphs = tempContainer.querySelectorAll("*");
+			paragraphs.forEach((p) => {
+				const cloned = p.cloneNode(true) as HTMLElement;
+				cloned.classList.add("text-sm", "mb-4", "line-clamp-3");
+				contentRef.current?.appendChild(cloned);
 			});
+			return;
 		}
-	}, [content]);
+
+		contentRef.current.innerHTML = sanitizedContent;
+
+		const elements = contentRef.current.querySelectorAll("*");
+		elements.forEach((element) => {
+			// Заголовки
+			if (element.tagName === "H1") {
+				element.classList.add("text-4xl", "font-bold", "mb-6");
+			} else if (element.tagName === "H2") {
+				element.classList.add("text-3xl", "font-bold", "mb-5");
+			} else if (element.tagName === "H3") {
+				element.classList.add("text-2xl", "font-bold", "mb-4");
+			}
+
+			// Параграфы
+			if (element.tagName === "P") {
+				element.classList.add("text-lg", "mb-4", "leading-relaxed");
+			}
+
+			// Списки
+			if (element.tagName === "UL" || element.tagName === "OL") {
+				element.classList.add("list-disc", "list-inside", "mb-4", "ml-4");
+			}
+
+			// Ссылки
+			if (element.tagName === "A") {
+				element.classList.add("text-primary", "hover:underline");
+			}
+
+			// Инлайн код
+			if (element.tagName === "CODE") {
+				element.classList.add("bg-muted", "px-2", "py-1", "rounded", "text-sm");
+			}
+
+			// Блоки кода
+			if (element.tagName === "PRE") {
+				element.classList.add(
+					"bg-muted",
+					"p-4",
+					"rounded-lg",
+					"overflow-x-auto",
+					"mb-4"
+				);
+			}
+
+			// Изображения
+			if (element.tagName === "IMG") {
+				element.classList.add("max-w-full", "rounded-lg", "my-4");
+			}
+
+			// Цитаты
+			if (element.tagName === "BLOCKQUOTE") {
+				element.classList.add(
+					"border-l-4",
+					"border-primary",
+					"pl-4",
+					"my-4",
+					"italic"
+				);
+			}
+		});
+	}, [content, mode]);
 
 	return (
 		<div

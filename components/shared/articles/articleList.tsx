@@ -2,17 +2,27 @@
 
 import React from "react";
 import { ArticleItem } from "./articleItem";
+import Link from "next/link";
+import { ArticleContent } from "../articleContent";
 
-interface Article {
+interface ArticlesResponse {
 	id: number;
 	title: string;
-	description: string;
-	date: string;
-	imageUrl: string;
+	content: string;
+	author_id: number;
+	created_at: string;
+	updated_at: string;
+	is_deleted: boolean;
+	images: Image[];
 }
 
+type Image = {
+	id: number;
+	image_path: string;
+};
+
 interface ArticleListProps {
-	articles: Article[];
+	articles: ArticlesResponse[];
 }
 
 export const ArticleList: React.FC<ArticleListProps> = ({ articles }) => {
@@ -23,9 +33,9 @@ export const ArticleList: React.FC<ArticleListProps> = ({ articles }) => {
 					key={index}
 					id={article.id}
 					title={article.title}
-					description={article.description}
-					date={article.date}
-					imageUrl={article.imageUrl}
+					description={article.content.slice(0, 50) + "..."}
+					date={new Date(article.updated_at).toLocaleDateString()}
+					imageUrl={article.images[0].image_path}
 				/>
 			))}
 		</div>

@@ -10,6 +10,8 @@ import { useRouter } from "next/navigation";
 import { Container } from "@/components/shared/container";
 import Link from "next/link";
 import { registerSchema } from "@/shemas/register";
+import { LoginFormData } from "@/shemas/login";
+import { RegisterFormData } from "@/shemas/register";
 
 const RegisterForm = () => {
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -23,9 +25,33 @@ const RegisterForm = () => {
 
 	const setToken = useAuthStore((state) => state.setToken);
 	const setAuthenticated = useAuthStore((state) => state.setAuthenticated);
+	const setEmail = useAuthStore((state) => state.setEmail);
+	const setPassword = useAuthStore((state) => state.setPassword);
 	const router = useRouter();
 
-	const onSubmit = async (data: any) => {
+	const loginAfterRegister = async (data: LoginFormData) => {
+		const response = await fetch("/api/auth/login", {
+			method: "POST",
+			body: JSON.stringify(data),
+			headers: {
+				"Content-Type": "application/json",
+				Accept: "application/json",
+			},
+			credentials: "include",
+		});
+		const res_with_token = await response.json();
+
+		if (res_with_token.token) {
+			console.log("res_with_token", res_with_token.token);
+			setAuthenticated(true);
+			setToken(res_with_token.token);
+			setEmail(data.email);
+			setPassword(data.password);
+			router.push("/cabinet");
+		}
+	};
+
+	const onSubmit = async (data: RegisterFormData) => {
 		setErrorMessage(null);
 
 		try {
@@ -47,10 +73,7 @@ const RegisterForm = () => {
 				throw new Error(result.message || "Ошибка регистрации");
 			}
 
-			setToken(result.accessToken);
-			setAuthenticated(true);
-			console.log("Успешная регистрация:", result);
-			router.push("/cabinet");
+			loginAfterRegister(data);
 		} catch (error: any) {
 			setErrorMessage(error.message || "Произошла ошибка при регистрации");
 		}

@@ -1,34 +1,62 @@
 "use client";
 
 import { useState } from "react";
-import { Editor, ArticleView } from "@/components/shared";
+import { Editor } from "@/components/shared";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useAuthStore } from "@/store/auth-store";
 
 export default function CreateArticle() {
-	const [content, setContent] = useState<string>("");
-	const [isPreview, setIsPreview] = useState(false);
+	const [title, setTitle] = useState("");
+	const [imageUrl, setImageUrl] = useState("");
+	const [content, setContent] = useState("");
+	const token = useAuthStore((state) => state.token);
 
 	const handleSave = (htmlContent: string) => {
 		setContent(htmlContent);
-		console.log(htmlContent);
-		setIsPreview(true);
+	};
+
+	const handleCreate = async (htmlContent: string) => {
+		const articleData = {
+			title,
+			image_url: imageUrl,
+			content: htmlContent,
+		};
+
+		// Вставь тут отправку на бэкенд
+		console.log("Отправка статьи:", articleData);
 	};
 
 	return (
-		<div className="max-w-4xl mx-auto p-4">
-			<div className="flex justify-between items-center mb-4">
-				<h1 className="text-2xl font-bold">Создать новую статью</h1>
-				<Button variant="outline" onClick={() => setIsPreview(!isPreview)}>
-					{isPreview ? "Редактировать" : "Предпросмотр"}
-				</Button>
+		<div className="max-w-4xl mx-auto p-4 space-y-6">
+			<h1 className="text-2xl font-bold">Создать новую статью</h1>
+
+			<div className="space-y-2">
+				<Label htmlFor="title">Название статьи</Label>
+				<Input
+					id="title"
+					value={title}
+					onChange={(e) => setTitle(e.target.value)}
+					placeholder="Введите заголовок статьи"
+				/>
 			</div>
-			{isPreview ? (
-				<div className="border rounded-lg shadow-sm">
-					<ArticleView content={content} />
-				</div>
-			) : (
-				<Editor onSave={handleSave} />
-			)}
+
+			<div className="space-y-2">
+				<Label htmlFor="image">Ссылка на изображение</Label>
+				<Input
+					id="image"
+					value={imageUrl}
+					onChange={(e) => setImageUrl(e.target.value)}
+					placeholder="https://example.com/image.jpg"
+				/>
+			</div>
+
+			<div className="space-y-2">
+				<Label>Содержимое статьи</Label>
+				<Editor onSave={handleSave} onCreate={handleCreate} />
+			</div>
 		</div>
 	);
 }

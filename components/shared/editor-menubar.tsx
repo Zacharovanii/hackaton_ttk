@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import {
 	Bold,
 	Italic,
@@ -7,18 +8,22 @@ import {
 	Heading2,
 	Heading3,
 	Save,
+	Plus,
+	FileUp,
 } from "lucide-react";
 
 export const MenuBar = ({
 	editor,
 	onSave,
+	onCreate,
+	className,
 }: {
 	editor: any;
 	onSave: (content: string) => void;
+	onCreate: (content: string) => void;
+	className?: string;
 }) => {
-	if (!editor) {
-		return null;
-	}
+	if (!editor) return null;
 
 	const handleSave = () => {
 		const content = editor.getHTML();
@@ -26,7 +31,12 @@ export const MenuBar = ({
 	};
 
 	return (
-		<div className="flex gap-2 p-2 border-b bg-secondary">
+		<div
+			className={cn(
+				"sticky top-0 z-50 flex gap-2 p-2 border-b bg-secondary shadow-sm backdrop-blur-md",
+				className
+			)}
+		>
 			<button
 				onClick={() => editor.chain().focus().toggleBold().run()}
 				className={`p-2 rounded hover:bg-ring transition-colors ${
@@ -84,6 +94,12 @@ export const MenuBar = ({
 				<ListOrdered size={16} />
 			</button>
 			<div className="ml-auto">
+				<button
+					onClick={() => onCreate(editor.getHTML())}
+					className="p-2 mx-4 rounded hover:bg-ring transition-colors bg-primary text-primary-foreground"
+				>
+					<FileUp size={16} />
+				</button>
 				<button
 					onClick={handleSave}
 					className="p-2 rounded hover:bg-ring transition-colors bg-primary text-primary-foreground"

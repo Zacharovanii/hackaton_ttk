@@ -9,10 +9,17 @@ import { useAuthStore } from "@/store/auth-store";
 import { useRouter } from "next/navigation";
 import { Container } from "@/components/shared/container";
 import Link from "next/link";
-import { loginSchema } from "@/shemas/login";
+import { loginSchema, LoginFormData } from "@/shemas/login";
+import { apiClient } from "@/services/api-client";
+import { AxiosResponse } from "axios";
+import { AxiosError } from "axios";
 
 const LoginForm = () => {
-	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const setIsAuth = useAuthStore((state) => state.setAuthenticated);
+	const setToken = useAuthStore((state) => state.setToken);
+	const setEmail = useAuthStore((state) => state.setEmail);
+	const setPassword = useAuthStore((state) => state.setPassword);
+
 	const {
 		register,
 		handleSubmit,
@@ -20,54 +27,28 @@ const LoginForm = () => {
 	} = useForm({
 		resolver: zodResolver(loginSchema),
 	});
-	const setToken = useAuthStore((state) => state.setToken);
-	const setAuthenticated = useAuthStore((state) => state.setAuthenticated);
+
 	const router = useRouter();
 
-	const onSubmit = async (data: any) => {
-		setErrorMessage(null);
+	const onSubmit = async (data: LoginFormData) => {
+		const response = await fetch("/api/auth/login", {
+			method: "POST",
+			body: JSON.stringify(data),
+			headers: {
+				"Content-Type": "application/json",
+				Accept: "application/json",
+			},
+			credentials: "include",
+		});
+		const res_with_token = await response.json();
 
-		try {
-			const res = await fetch("/api/auth/login", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					email: data.email,
-					password: data.password,
-				}),
-			});
-
-			const result = await res.json();
-
-			if (!res.ok) {
-				throw new Error(result.error || "Ошибка авторизации");
-			}
-
-			// Получаем токен из куки
-			function getCookie(name: string) {
-				const cookies = document.cookie.split(";");
-				for (let cookie of cookies) {
-					const [cookieName, cookieValue] = cookie.split("=");
-					if (cookieName.trim() === name) {
-						return decodeURIComponent(cookieValue);
-					}
-				}
-				return null;
-			}
-
-			// Получить токен
-			const token = getCookie("access_token");
-			console.log(token); // Ваш токен
-
-			if (token) {
-				setToken(token);
-				setAuthenticated(true);
-				router.push("/cabinet");
-			} else {
-				throw new Error("Токен не найден в куки");
-			}
-		} catch (error: any) {
-			setErrorMessage(error.message);
+		if (res_with_token.token) {
+			console.log("res_with_token", res_with_token.token);
+			setIsAuth(true);
+			setToken(res_with_token.token);
+			setEmail(data.email);
+			setPassword(data.password);
+			router.push("/cabinet");
 		}
 	};
 
@@ -95,31 +76,13 @@ const LoginForm = () => {
 						)}
 					</div>
 
-					{errorMessage && (
+					{/* {errorMessage && (
 						<p className="text-red-500 text-sm">{errorMessage}</p>
-					)}
+					)} */}
 
 					<Button type="submit" disabled={isSubmitting} className="w-full">
 						{isSubmitting ? "Вход..." : "Войти"}
 					</Button>
-
-					{/* <div className="text-center">
-						<Link
-							href="/auth/forgot-password"
-							className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-						>
-							Забыли пароль?
-						</Link>
-					</div> */}
-
-					<div className="relative my-6">
-						<div className="absolute inset-0 flex items-center">
-							<div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
-						</div>
-						<div className="relative flex justify-center text-sm">
-							<span className="px-2 bg-background text-gray-500 dark:text-gray-400"></span>
-						</div>
-					</div>
 
 					<div className="text-center mt-4">
 						<p className="text-sm text-gray-600 dark:text-gray-400">

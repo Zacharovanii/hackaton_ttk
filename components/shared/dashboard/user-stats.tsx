@@ -2,30 +2,42 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookOpen, Clock, Trophy, Star } from "lucide-react";
+import React from "react";
 
-export function UserStats() {
+interface UserStats {
+	total_articles: number;
+	total_tasks: number;
+	edited_articles: number;
+	current_task: number;
+}
+export const UserStats: React.FC<UserStats> = ({
+	current_task,
+	edited_articles,
+	total_articles,
+	total_tasks,
+}) => {
 	const stats = [
 		{
 			title: "Прочитано статей",
-			value: "42",
+			value: total_articles,
 			icon: BookOpen,
 			description: "За последний месяц",
 		},
 		{
-			title: "Время обучения",
-			value: "24ч",
+			title: "Редактировано статей",
+			value: edited_articles,
 			icon: Clock,
 			description: "За последнюю неделю",
 		},
 		{
-			title: "Достижения",
-			value: "8",
+			title: "Завершено заданий",
+			value: total_tasks,
 			icon: Trophy,
 			description: "Получено наград",
 		},
 		{
-			title: "Рейтинг",
-			value: "4.8",
+			title: "Законченых заданий",
+			value: current_task,
 			icon: Star,
 			description: "Средняя оценка",
 		},
@@ -47,4 +59,4 @@ export function UserStats() {
 			))}
 		</div>
 	);
-}
+};
